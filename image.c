@@ -68,7 +68,7 @@ uint8_t getPixelValue(Image* srcImage,int x,int y,int bit,Matrix algorithm){
 //Returns: Nothing
 void *convolute(void *convargs){
     int row,pix,bit,span;
-    span=srcImage->bpp*srcImage->bpp;
+    span=((struct args*)convargs)->srcImage->bpp*((struct args*)convargs)->srcImage->bpp;
     for (pix=0;pix<((struct args*)convargs)->srcImage->width;pix++){
         for (bit=0;bit<((struct args*)convargs)->srcImage->bpp;bit++){
             pthread_mutex_lock(&mutex);
@@ -133,13 +133,13 @@ int main(int argc,char** argv){
 
     convargs->srcImage = &srcImage;
     convargs->destImage = &destImage;
-    memcpy(convargs->algoritm, algorithms[type], sizeof(algorithms[type]));
+    memcpy(convargs->algorithm, algorithms[type], sizeof(algorithms[type]));
 
-    for (row=0;row<srcImage.height;row++){
-        pthread_create(&thread_handles[thread],NULL,convolute,(void*)convargs);
+    for (int row=0;row<srcImage.height;row++){
+        pthread_create(&thread_handles[row],NULL,convolute,(void*)convargs);
     }
-    for (row=0;row<srcImage.height;row++){
-        pthread_join(&thread_handles[thread],NULL,)
+    for (int row=0;row<srcImage.height;row++){
+        pthread_join(&thread_handles[row],NULL)
     }
     free(pthread_handles);
     pthread_mutex_destroy(&mutex);
