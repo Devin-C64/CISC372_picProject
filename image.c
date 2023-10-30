@@ -29,7 +29,7 @@ struct args {
     Image* srcImage;
     Image* destImage;
     Matrix algorithm;
-}
+};
 
 
 //getPixelValue - Computes the value of a specific pixel on a specific channel using the selected convolution kernel
