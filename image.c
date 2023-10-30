@@ -130,12 +130,6 @@ int main(int argc,char** argv){
     pthread_t* thread_handles;
     thread_handles=(pthread_t*)malloc(srcImage.height*sizeof(pthread_t));
 
-    struct args *convargs = (struct args *)malloc(sizeof(struct args));
-
-    convargs->srcImage = &srcImage;
-    convargs->destImage = &destImage;
-    memcpy(convargs->algorithm, algorithms[type], sizeof(algorithms[type]));
-
     int row;
     struct args* convargs[srcImage.height];
     for (row=0;row<srcImage.height;row++){
