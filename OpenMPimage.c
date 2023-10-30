@@ -66,12 +66,14 @@ uint8_t getPixelValue(Image* srcImage,int x,int y,int bit,Matrix algorithm){
 //            algorithm: The kernel matrix to use for the convolution
 //Returns: Nothing
 void *convolute(void *convargs){
-    int pix,bit,span;
+    int row,pix,bit,span;
     span=((struct args*)convargs)->srcImage->bpp*((struct args*)convargs)->srcImage->bpp;
-    for (pix=0;pix<((struct args*)convargs)->srcImage->width;pix++){
-        for (bit=0;bit<((struct args*)convargs)->srcImage->bpp;bit++){
-            # pragma omp critical
-            ((struct args*)convargs)->destImage->data[Index(pix,((struct args*)convargs)->row,((struct args*)convargs)->srcImage->width,bit,((struct args*)convargs)->srcImage->bpp)]=getPixelValue(((struct args*)convargs)->srcImage,pix,((struct args*)convargs)->row,bit,((struct args*)convargs)->algorithm);
+    for (row=0;row<((struct args*)convargs)->srcImage->height;row++){
+        for (pix=0;pix<((struct args*)convargs)->srcImage->width;pix++){
+            for (bit=0;bit<((struct args*)convargs)->srcImage->bpp;bit++){
+                # pragma omp critical
+                ((struct args*)convargs)->destImage->data[Index(pix,((struct args*)convargs)->row,((struct args*)convargs)->srcImage->width,bit,((struct args*)convargs)->srcImage->bpp)]=getPixelValue(((struct args*)convargs)->srcImage,pix,((struct args*)convargs)->row,bit,((struct args*)convargs)->algorithm);
+            }
         }
     }
     
