@@ -138,6 +138,10 @@ int main(int argc,char** argv){
 
     int row;
     for (row=0;row<srcImage.height;row++){
+        struct args *convargs = (struct args *)malloc(sizeof(struct args));
+        convargs->srcImage = &srcImage;
+        convargs->destImage = &destImage;
+        memcpy(convargs->algorithm, algorithms[type], sizeof(algorithms[type]));
         convargs->row = row;
         pthread_create(&thread_handles[row],NULL,convolute,(void*)convargs);
     }
