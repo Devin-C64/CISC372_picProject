@@ -60,7 +60,7 @@ uint8_t getPixelValue(Image* srcImage,int x,int y,int bit,Matrix algorithm){
 //Returns: Nothing
 void convolute(Image* srcImage,Image* destImage,Matrix algorithm){
     int row,pix,bit;
-    # pragma omp for private(row,pix,bit) schedule(dynamic){
+    # pragma omp for private(row,pix,bit) schedule(dynamic)
         for (row=0;row<srcImage->height;row++){
             for (pix=0;pix<srcImage->width;pix++){
                 for (bit=0;bit<srcImage->bpp;bit++){
@@ -68,7 +68,7 @@ void convolute(Image* srcImage,Image* destImage,Matrix algorithm){
                 }
             }
         }
-    }
+    
     
 }
 
