@@ -71,7 +71,6 @@ void *convolute(void *convargs){
     for (row=0;row<((struct args*)convargs)->srcImage->height;row++){
         for (pix=0;pix<((struct args*)convargs)->srcImage->width;pix++){
             for (bit=0;bit<((struct args*)convargs)->srcImage->bpp;bit++){
-                # pragma omp critical
                 ((struct args*)convargs)->destImage->data[Index(pix,((struct args*)convargs)->row,((struct args*)convargs)->srcImage->width,bit,((struct args*)convargs)->srcImage->bpp)]=getPixelValue(((struct args*)convargs)->srcImage,pix,((struct args*)convargs)->row,bit,((struct args*)convargs)->algorithm);
             }
         }
