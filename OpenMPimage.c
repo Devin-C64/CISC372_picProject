@@ -23,13 +23,6 @@ Matrix algorithms[]={
     {{0,0,0},{0,1,0},{0,0,0}}
 };
 
-struct args {
-    Image* srcImage;
-    Image* destImage;
-    Matrix algorithm;
-    int row;
-};
-
 
 //getPixelValue - Computes the value of a specific pixel on a specific channel using the selected convolution kernel
 //Paramters: srcImage:  An Image struct populated with the image being convoluted
@@ -65,17 +58,17 @@ uint8_t getPixelValue(Image* srcImage,int x,int y,int bit,Matrix algorithm){
 //            destImage: A pointer to a  pre-allocated (including space for the pixel array) structure to receive the convoluted image.  It should be the same size as srcImage
 //            algorithm: The kernel matrix to use for the convolution
 //Returns: Nothing
-void *convolute(void *convargs){
+void convolute(Image* srcImage,Image* destImage,Matrix algorithm){
     int row,pix,bit,span;
-    span=((struct args*)convargs)->srcImage->bpp*((struct args*)convargs)->srcImage->bpp;
-    for (row=0;row<((struct args*)convargs)->srcImage->height;row++){
-        for (pix=0;pix<((struct args*)convargs)->srcImage->width;pix++){
-            for (bit=0;bit<((struct args*)convargs)->srcImage->bpp;bit++){
-                ((struct args*)convargs)->destImage->data[Index(pix,((struct args*)convargs)->row,((struct args*)convargs)->srcImage->width,bit,((struct args*)convargs)->srcImage->bpp)]=getPixelValue(((struct args*)convargs)->srcImage,pix,((struct args*)convargs)->row,bit,((struct args*)convargs)->algorithm);
+    span=srcImage->bpp*srcImage->bpp;
+    # pragma omp for private(row,pix,bit)
+    for (row=0;row<srcImage->height;row++){
+        for (pix=0;pix<srcImage->width;pix++){
+            for (bit=0;bit<srcImage->bpp;bit++){
+                destImage->data[Index(pix,row,srcImage->width,bit,srcImage->bpp)]=getPixelValue(srcImage,pix,row,bit,algorithm);
             }
         }
     }
-    
 }
 
 //Usage: Prints usage information for the program
@@ -122,14 +115,8 @@ int main(int argc,char** argv){
     destImage.width=srcImage.width;
     destImage.data=malloc(sizeof(uint8_t)*destImage.width*destImage.bpp*destImage.height);
 
-    struct args *convargs = (struct args *)malloc(sizeof(struct args));
-
-    convargs->srcImage = &srcImage;
-    convargs->destImage = &destImage;
-    memcpy(convargs->algorithm, algorithms[type], sizeof(algorithms[type]));
-
     # pragma omp parallel num_threads(srcImage.height)
-    convolute(convargs);
+    convolute(&srcImage,&destImage,algorithms[type]);
     
 
     stbi_write_png("output.png",destImage.width,destImage.height,destImage.bpp,destImage.data,destImage.bpp*destImage.width);
