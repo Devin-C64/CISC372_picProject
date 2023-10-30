@@ -137,13 +137,14 @@ int main(int argc,char** argv){
     memcpy(convargs->algorithm, algorithms[type], sizeof(algorithms[type]));
 
     int row;
+    struct args* convargs[srcImage.height];
     for (row=0;row<srcImage.height;row++){
-        struct args *convargs = (struct args *)malloc(sizeof(struct args));
-        convargs->srcImage = &srcImage;
-        convargs->destImage = &destImage;
-        memcpy(convargs->algorithm, algorithms[type], sizeof(algorithms[type]));
-        convargs->row = row;
-        pthread_create(&thread_handles[row],NULL,convolute,(void*)convargs);
+        convargs[row] = (struct args *)malloc(sizeof(struct args));
+        convargs[row]->srcImage = &srcImage;
+        convargs[row]->destImage = &destImage;
+        memcpy(convargs[row]->algorithm, algorithms[type], sizeof(algorithms[type]));
+        convargs[row]->row = row;
+        pthread_create(&thread_handles[row],NULL,convolute,(void*)convargs[row]);
     }
     for (row=0;row<srcImage.height;row++){
         pthread_join(thread_handles[row],NULL);
