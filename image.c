@@ -29,6 +29,7 @@ struct args {
     Image* srcImage;
     Image* destImage;
     Matrix algorithm;
+    int row;
 };
 
 
@@ -67,12 +68,12 @@ uint8_t getPixelValue(Image* srcImage,int x,int y,int bit,Matrix algorithm){
 //            algorithm: The kernel matrix to use for the convolution
 //Returns: Nothing
 void *convolute(void *convargs){
-    int row,pix,bit,span;
+    int pix,bit,span;
     span=((struct args*)convargs)->srcImage->bpp*((struct args*)convargs)->srcImage->bpp;
     for (pix=0;pix<((struct args*)convargs)->srcImage->width;pix++){
         for (bit=0;bit<((struct args*)convargs)->srcImage->bpp;bit++){
             pthread_mutex_lock(&mutex);
-            ((struct args*)convargs)->destImage->data[Index(pix,row,((struct args*)convargs)->srcImage->width,bit,((struct args*)convargs)->srcImage->bpp)]=getPixelValue(((struct args*)convargs)->srcImage,pix,row,bit,((struct args*)convargs)->algorithm);
+            ((struct args*)convargs)->destImage->data[Index(pix,((struct args*)convargs)->row,((struct args*)convargs)->srcImage->width,bit,((struct args*)convargs)->srcImage->bpp)]=getPixelValue(((struct args*)convargs)->srcImage,pix,((struct args*)convargs)->row,bit,((struct args*)convargs)->algorithm);
             pthread_mutex_unlock(&mutex);
         }
     }
@@ -135,13 +136,15 @@ int main(int argc,char** argv){
     convargs->destImage = &destImage;
     memcpy(convargs->algorithm, algorithms[type], sizeof(algorithms[type]));
 
-    for (int row=0;row<srcImage.height;row++){
+    int row;
+    for (row=0;row<srcImage.height;row++){
+        convargs->row = row;
         pthread_create(&thread_handles[row],NULL,convolute,(void*)convargs);
     }
-    for (int row=0;row<srcImage.height;row++){
-        pthread_join(&thread_handles[row],NULL)
+    for (row=0;row<srcImage.height;row++){
+        pthread_join(&thread_handles[row],NULL);
     }
-    free(pthread_handles);
+    free(thread_handles);
     pthread_mutex_destroy(&mutex);
     stbi_write_png("output.png",destImage.width,destImage.height,destImage.bpp,destImage.data,destImage.bpp*destImage.width);
     stbi_image_free(srcImage.data);
