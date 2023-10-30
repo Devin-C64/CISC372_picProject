@@ -127,7 +127,7 @@ int main(int argc,char** argv){
     convargs->destImage = &destImage;
     memcpy(convargs->algorithm, algorithms[type], sizeof(algorithms[type]));
 
-    # pragma omp parallel num_threads(srcImage.height);
+    # pragma omp parallel num_threads(srcImage.height)
     convolute(convargs);
 
     stbi_write_png("output.png",destImage.width,destImage.height,destImage.bpp,destImage.data,destImage.bpp*destImage.width);
