@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <string.h>
-#include "serialimage.h"
+#include "image2.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
