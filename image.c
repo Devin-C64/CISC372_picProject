@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include "image.h"
+#include "pthread.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -20,6 +22,14 @@ Matrix algorithms[]={
     {{-2,-1,0},{-1,1,1},{0,1,2}},
     {{0,0,0},{0,1,0},{0,0,0}}
 };
+
+pthread_mutex_t mutex;
+
+struct args {
+    Image* srcImage;
+    Image* destImage;
+    Matrix algorithm;
+}
 
 
 //getPixelValue - Computes the value of a specific pixel on a specific channel using the selected convolution kernel
@@ -56,16 +66,17 @@ uint8_t getPixelValue(Image* srcImage,int x,int y,int bit,Matrix algorithm){
 //            destImage: A pointer to a  pre-allocated (including space for the pixel array) structure to receive the convoluted image.  It should be the same size as srcImage
 //            algorithm: The kernel matrix to use for the convolution
 //Returns: Nothing
-void convolute(Image* srcImage,Image* destImage,Matrix algorithm){
+void *convolute(void *convargs){
     int row,pix,bit,span;
     span=srcImage->bpp*srcImage->bpp;
-    for (row=0;row<srcImage->height;row++){
-        for (pix=0;pix<srcImage->width;pix++){
-            for (bit=0;bit<srcImage->bpp;bit++){
-                destImage->data[Index(pix,row,srcImage->width,bit,srcImage->bpp)]=getPixelValue(srcImage,pix,row,bit,algorithm);
-            }
+    for (pix=0;pix<((struct args*)convargs)->srcImage->width;pix++){
+        for (bit=0;bit<((struct args*)convargs)->srcImage->bpp;bit++){
+            pthread_mutex_lock(&mutex);
+            ((struct args*)convargs)->destImage->data[Index(pix,row,((struct args*)convargs)->srcImage->width,bit,((struct args*)convargs)->srcImage->bpp)]=getPixelValue(((struct args*)convargs)->srcImage,pix,row,bit,((struct args*)convargs)->algorithm);
+            pthread_mutex_unlock(&mutex);
         }
     }
+    
 }
 
 //Usage: Prints usage information for the program
@@ -111,7 +122,27 @@ int main(int argc,char** argv){
     destImage.height=srcImage.height;
     destImage.width=srcImage.width;
     destImage.data=malloc(sizeof(uint8_t)*destImage.width*destImage.bpp*destImage.height);
-    convolute(&srcImage,&destImage,algorithms[type]);
+
+    pthread_mutexattr_t attr;
+    pthread_mutex_init(&mutex, &attr);
+
+    pthread_t* thread_handles;
+    thread_handles=(pthread_t*)malloc(srcImage.height*sizeof(pthread_t));
+
+    struct args *convargs = (struct args *)malloc(sizeof(struct args));
+
+    convargs->srcImage = &srcImage;
+    convargs->destImage = &destImage;
+    memcpy(convargs->algoritm, algorithms[type], sizeof(algorithms[type]));
+
+    for (row=0;row<srcImage.height;row++){
+        pthread_create(&thread_handles[thread],NULL,convolute,(void*)convargs);
+    }
+    for (row=0;row<srcImage.height;row++){
+        pthread_join(&thread_handles[thread],NULL,)
+    }
+    free(pthread_handles);
+    pthread_mutex_destroy(&mutex);
     stbi_write_png("output.png",destImage.width,destImage.height,destImage.bpp,destImage.data,destImage.bpp*destImage.width);
     stbi_image_free(srcImage.data);
     
