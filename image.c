@@ -142,7 +142,7 @@ int main(int argc,char** argv){
         pthread_create(&thread_handles[row],NULL,convolute,(void*)convargs);
     }
     for (row=0;row<srcImage.height;row++){
-        pthread_join(&thread_handles[row],NULL);
+        pthread_join(thread_handles[row],NULL);
     }
     free(thread_handles);
     pthread_mutex_destroy(&mutex);
