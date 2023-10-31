@@ -1,0 +1,17 @@
+Script started on Mon 30 Oct 2023 08:58:54 PM EDT
+]0;devinjc@login01.darwin:~/CISC372_picProject[?1034h[(ea-cisc372-silber:devinjc)@login01.darwin CISC372_picProject]$ salloc --ntasks=1 --cpus-per=[K-task=4 --p artition=standard
+salloc: Granted job allocation 4764852
+salloc: Waiting for resource configuration
+salloc: Nodes r1n00 are ready for job
+]0;devinjc@r1n00.darwin:~/CISC372_picProject[?1034h[devinjc@r1n00 CISC372_picProject]$ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+]0;devinjc@r1n00.darwin:~/CISC372_picProject[devinjc@r1n00 CISC372_picProject]$ srun image pic1.jpg edge
+Took 8 seconds
+]0;devinjc@r1n00.darwin:~/CISC372_picProject[devinjc@r1n00 CISC372_picProject]$ srun OpenMPimage pic1.jpg edge
+Took 7 seconds
+]0;devinjc@r1n00.darwin:~/CISC372_picProject[devinjc@r1n00 CISC372_picProject]$ exit
+logout
+salloc: Relinquishing job allocation 4764852
+]0;devinjc@login01.darwin:~/CISC372_picProject[(ea-cisc372-silber:devinjc)@login01.darwin CISC372_picProject]$ exit
+exit
+
+Script done on Mon 30 Oct 2023 09:00:41 PM EDT
